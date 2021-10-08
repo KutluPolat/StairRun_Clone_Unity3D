@@ -7,30 +7,37 @@ public class GameManager : MonoBehaviour
     public Animator playerAnimator;
     public Rigidbody playerRigidbody;
     public float playerHorizontalSpeed = 2f, playerVerticalSpeed = 3f;
-    private bool _isGameStarted, _isGameEnded;
 
     private void Update()
     {
+        AnimationController();
         MoveForward();
-        VerticalMovementControllerForAndroid();
+
+#if UNITY_EDITOR
         VerticalMovementControllerForUnityEditor();
+#elif PLATFORM_ANDROID
+        VerticalMovementControllerForAndroid();
+#endif
     }
    
     private void VerticalMovementControllerForAndroid()
     {
-#if PLATFORM_ANDROID
         if (Input.touchCount > 0)
         {
-            _isGameStarted = true;
+            StaticVariables._isGameStarted = true;
             Move(0, playerVerticalSpeed * Time.deltaTime);
         }
-#endif
     }
     private void VerticalMovementControllerForUnityEditor()
     {
-#if UNITY_EDITOR
         if (Input.GetKeyDown(KeyCode.W))
-            _isGameStarted = true;
+            StaticVariables._isGameStarted = true;
+
+        if(StaticVariables._stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
+        {
+            playerRigidbody.useGravity = true;
+            return;
+        }
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -43,16 +50,24 @@ public class GameManager : MonoBehaviour
             Move(0, playerVerticalSpeed * Time.deltaTime);
 
         if (Input.GetKeyUp(KeyCode.Space))
+        {
             playerRigidbody.useGravity = true;
-#endif
+        } 
     }
     private void MoveForward() => Move(-playerHorizontalSpeed * Time.deltaTime);
     private void Move(float directionX, float directionY = 0)
     {
-        if (_isGameStarted && !_isGameEnded)
+        if (StaticVariables._isGameStarted && !StaticVariables._isGameEnded)
         {
-            playerAnimator.SetTrigger("Run");
             transform.position = new Vector3(transform.position.x + directionX, transform.position.y + directionY, transform.position.z);
-        }  
+        }
+    }
+    private void AnimationController()
+    {
+        if(playerRigidbody.velocity.magnitude > 0.5f && StaticVariables._isGameStarted)
+            playerAnimator.SetTrigger("Fall");
+
+        else if(StaticVariables._isGameStarted)
+            playerAnimator.SetTrigger("Run");
     }
 }
