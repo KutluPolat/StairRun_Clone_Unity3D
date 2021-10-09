@@ -1511,6 +1511,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8164078558771037576, guid: b5cb110a8774043408696a3abf14e2b0,
         type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 8164078558771037576, guid: b5cb110a8774043408696a3abf14e2b0,
+        type: 3}
       propertyPath: m_StaticEditorFlags
       value: 0
       objectReference: {fileID: 0}
@@ -2255,6 +2260,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3fa603b5a6d3b344918e20bd3d27ef5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  playerRigidbody: {fileID: 1297581479}
+  playerMaterial: {fileID: 2100000, guid: cb96daa1845b6684b85ccaefb93a1b00, type: 2}
 --- !u!1001 &562502370
 PrefabInstance:
   m_ObjectHideFlags: 0

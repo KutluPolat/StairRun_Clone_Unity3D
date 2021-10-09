@@ -69,7 +69,7 @@ public class BackpackClass
     }
 
     /// <summary>
-    /// Push player back and drop 10 stairs.
+    /// Drops up to 10 stairs.
     /// </summary>
     public void DropStairsFromBackPack()
     {
@@ -78,7 +78,7 @@ public class BackpackClass
         {
             for (int localZ = 2; localZ >= 0; localZ--)
             {
-                // if there's any valid object without rigidbody, instantiate it to a temporary object and destroy the original one.
+                // if there's any valid object instantiate it to a temporary object and destroy the original one.
                 if (_stairsInBackpack[localY, localZ] != null)
                 {
                     var temporalObject = new GameObject();

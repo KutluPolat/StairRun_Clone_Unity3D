@@ -11,18 +11,21 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         AnimationController();
+        PlayerControls();
+    }
+    private void PlayerControls()
+    {
         MoveForward();
-
 #if UNITY_EDITOR
         VerticalMovementControllerForUnityEditor();
 #elif PLATFORM_ANDROID
         VerticalMovementControllerForAndroid();
 #endif
     }
-   
+
     private void VerticalMovementControllerForAndroid()
     {
-        if (StaticVariables.backpack.stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
+        if (StaticVariables.backpack.stairsInBackpackCounter == 0)
         {
             FallDown();
             return;
@@ -30,10 +33,10 @@ public class GameManager : MonoBehaviour
 
         if (Input.touchCount > 0)
         {
-            StaticVariables._isGameStarted = true;
-
             if (Input.touches[0].phase == TouchPhase.Began)
             {
+                StaticVariables._isGameStarted = true;
+
                 StartToClimbLadder();
                 StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
             }
@@ -51,7 +54,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
             StaticVariables._isGameStarted = true;
 
-        if (StaticVariables.backpack.stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
+        if (StaticVariables.backpack.stairsInBackpackCounter == 0)
         {
             FallDown();
             return;
