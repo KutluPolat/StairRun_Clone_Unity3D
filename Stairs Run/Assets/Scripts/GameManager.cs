@@ -22,10 +22,23 @@ public class GameManager : MonoBehaviour
    
     private void VerticalMovementControllerForAndroid()
     {
+        if (StaticVariables.backpack.stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
+        {
+            FallDown();
+            return;
+        }
+
         if (Input.touchCount > 0)
         {
             StaticVariables._isGameStarted = true;
-            Move(0, playerVerticalSpeed * Time.deltaTime);
+
+            if (Input.touches[0].phase == TouchPhase.Began)
+                StartToClimbLadder();
+
+            ClimbLadder();
+
+            if (Input.touches[0].phase == TouchPhase.Canceled)
+                FallDown();
         }
     }
     private void VerticalMovementControllerForUnityEditor()
@@ -33,27 +46,48 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.W))
             StaticVariables._isGameStarted = true;
 
-        if(StaticVariables._stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
+        if (StaticVariables.backpack.stairsInBackpackCounter == 0 && StaticVariables._isGameStarted)
         {
-            playerRigidbody.useGravity = true;
+            FallDown();
             return;
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
-        {
-            playerRigidbody.useGravity = false;
-            playerRigidbody.velocity = Vector3.zero;
-            playerRigidbody.angularVelocity = Vector3.zero;
-        }
+            StartToClimbLadder();
 
         if (Input.GetKey(KeyCode.Space))
-            Move(0, playerVerticalSpeed * Time.deltaTime);
+            ClimbLadder();
 
         if (Input.GetKeyUp(KeyCode.Space))
-        {
-            playerRigidbody.useGravity = true;
-        } 
+            FallDown();
     }
+    private void StartToClimbLadder()
+    {
+        playerRigidbody.useGravity = false;
+        playerRigidbody.velocity = Vector3.zero;
+        playerRigidbody.angularVelocity = Vector3.zero;
+    }
+    private void FallDown()
+    {
+        // Add rigidbody to player so chibi can fall down
+        playerRigidbody.useGravity = true;
+
+        // Add rigidbody to placed stairs and destroy them after one second
+        foreach (GameObject spawnedStair in GameObject.FindGameObjectsWithTag("SpawnedStair"))
+        {
+            if (spawnedStair.GetComponent<Rigidbody>() == null)
+                spawnedStair.AddComponent<Rigidbody>();
+
+            spawnedStair.GetComponent<BoxCollider>().isTrigger = false; // Closing is trigger so stairs can stop when they hit platform.
+            StartCoroutine(DestroyAfterOneSecond(spawnedStair));
+        }
+    }
+    private IEnumerator DestroyAfterOneSecond(GameObject objectThatWillDestroyed)
+    {
+        yield return new WaitForSeconds(1f);
+        Destroy(objectThatWillDestroyed);
+    }
+    private void ClimbLadder() => Move(0, playerVerticalSpeed * Time.deltaTime);
     private void MoveForward() => Move(-playerHorizontalSpeed * Time.deltaTime);
     private void Move(float directionX, float directionY = 0)
     {

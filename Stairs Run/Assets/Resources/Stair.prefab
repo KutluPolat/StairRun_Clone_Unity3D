@@ -85,7 +85,7 @@ PrefabInstance:
     - target: {fileID: 4389974421888975766, guid: 7a28a4823de820744a918d261b16cc61,
         type: 3}
       propertyPath: m_TagString
-      value: Untagged
+      value: SpawnedStair
       objectReference: {fileID: 0}
     m_RemovedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 7a28a4823de820744a918d261b16cc61, type: 3}

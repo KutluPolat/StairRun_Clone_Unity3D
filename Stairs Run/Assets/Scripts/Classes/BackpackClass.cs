@@ -2,21 +2,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Backpack
+public class BackpackClass
 {
     private GameObject[,] _stairsInBackpack = new GameObject[50, 3];
-    private GameObject _miniStairPrefab, _backpack, _stairPrefab;
-    private float _yMarginOfStairs = 0.2f;
-    
-    private BoxCollider _boxColliderOfPlayer;
-    private Bounds _boundsOfLatestSpawnedStair;
+    private GameObject _miniStairForBackpack, _backpack;
 
-    public Backpack()
+    public int stairsInBackpackCounter;
+    public BackpackClass()
     {
-        _miniStairPrefab = Resources.Load<GameObject>("MiniStack");
-        _stairPrefab = Resources.Load<GameObject>("Stair");
+        _miniStairForBackpack = Resources.Load<GameObject>("MiniStack");
         _backpack = GameObject.Find("BackPack");
-        _boxColliderOfPlayer = GameObject.Find("Chibi").GetComponent<BoxCollider>();
     }
 
     /// <summary><para>Checks _stairsInBackpack array from first element to last.<br/>
@@ -35,7 +30,8 @@ public class Backpack
             {
                 if (_stairsInBackpack[vertical, horizontal] == null)
                 {
-                    _stairsInBackpack[vertical, horizontal] = MonoBehaviour.Instantiate(_miniStairPrefab, Vector3.zero, Quaternion.identity, _backpack.transform);
+                    _stairsInBackpack[vertical, horizontal] = 
+                        MonoBehaviour.Instantiate(_miniStairForBackpack, Vector3.zero, Quaternion.identity, _backpack.transform);
 
                     float localZValue = horizontal == 0 ? -0.1f : horizontal == 1 ? 0 : 0.1f;
                     float localYValue = vertical == 0 ? -0.05f : vertical == 1 ? 0 : 0.05f * (vertical - 1);
@@ -45,7 +41,7 @@ public class Backpack
                     _stairsInBackpack[vertical, horizontal].transform.localPosition = spawnPosition;
                     _stairsInBackpack[vertical, horizontal].transform.localRotation = rotation;
 
-                    StaticVariables._stairsInBackpackCounter++;
+                    stairsInBackpackCounter++;
                     return;
                 }
             }
@@ -65,7 +61,7 @@ public class Backpack
                 if (_stairsInBackpack[localY, localZ] != null)
                 {
                     MonoBehaviour.Destroy(_stairsInBackpack[localY, localZ]);
-                    StaticVariables._stairsInBackpackCounter--;
+                    stairsInBackpackCounter--;
                     return;
                 }
             }
@@ -75,24 +71,24 @@ public class Backpack
     /// <summary>
     /// Push player back and drop 10 stairs.
     /// </summary>
-    public void Stumble()
+    public void DropStairsFromBackPack()
     {
         int droppedStairCounter = 0;
         for (int localY = 49; localY >= 0; localY--)
         {
             for (int localZ = 2; localZ >= 0; localZ--)
             {
-                // if there's any valid object without rigidbody;
+                // if there's any valid object without rigidbody, instantiate it to a temporary object and destroy the original one.
                 if (_stairsInBackpack[localY, localZ] != null)
                 {
                     var temporalObject = new GameObject();
-                    temporalObject = MonoBehaviour.Instantiate( // Instantiate a temporary object and destroy the original one.
+                    temporalObject = MonoBehaviour.Instantiate( 
                         _stairsInBackpack[localY, localZ],
                         _stairsInBackpack[localY, localZ].transform.position,
                         _stairsInBackpack[localY, localZ].transform.rotation);
 
                     MonoBehaviour.Destroy(_stairsInBackpack[localY, localZ]);
-                    StaticVariables._stairsInBackpackCounter--;
+                    stairsInBackpackCounter--;
 
                     temporalObject.AddComponent<Rigidbody>()
                         .velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(3f, 5f), Random.Range(-1f, 1f));
@@ -102,27 +98,6 @@ public class Backpack
                         return;
                 }
             }
-        }
-    }
-    public void ResetBoundsOfLatestSpawnedStair()
-    {
-        _boundsOfLatestSpawnedStair.center = _boxColliderOfPlayer.bounds.center;
-        _boundsOfLatestSpawnedStair.min = _boxColliderOfPlayer.bounds.max;
-        _boundsOfLatestSpawnedStair.max = _boxColliderOfPlayer.bounds.min;
-    }
-
-    public void PlaceStairs()
-    {
-        if (_boundsOfLatestSpawnedStair == null || _boxColliderOfPlayer.bounds.max.x < _boundsOfLatestSpawnedStair.min.x)
-        {
-            DeleteStairFromBackpack();
-
-            var spawnPosition = new Vector3(
-                _boxColliderOfPlayer.bounds.center.x,
-                _boxColliderOfPlayer.bounds.min.y,
-                _boxColliderOfPlayer.bounds.center.z);
-
-            _boundsOfLatestSpawnedStair = MonoBehaviour.Instantiate(_stairPrefab, spawnPosition, _stairPrefab.transform.rotation).GetComponent<BoxCollider>().bounds;
         }
     }
 }
