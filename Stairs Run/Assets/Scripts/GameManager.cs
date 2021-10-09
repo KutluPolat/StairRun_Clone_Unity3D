@@ -33,9 +33,14 @@ public class GameManager : MonoBehaviour
             StaticVariables._isGameStarted = true;
 
             if (Input.touches[0].phase == TouchPhase.Began)
+            {
                 StartToClimbLadder();
+                StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
+            }
 
-            ClimbLadder();
+            StaticVariables.stairSpawnManager.PlaceStairs();
+            ClimbLadder(); 
+            
 
             if (Input.touches[0].phase == TouchPhase.Canceled)
                 FallDown();
@@ -53,10 +58,16 @@ public class GameManager : MonoBehaviour
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
+        {
             StartToClimbLadder();
+            StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
+        }
 
         if (Input.GetKey(KeyCode.Space))
+        {
             ClimbLadder();
+            StaticVariables.stairSpawnManager.PlaceStairs();
+        }
 
         if (Input.GetKeyUp(KeyCode.Space))
             FallDown();
@@ -69,7 +80,7 @@ public class GameManager : MonoBehaviour
     }
     private void FallDown()
     {
-        // Add rigidbody to player so chibi can fall down
+        // Set useGravity to true so chibi can fall down
         playerRigidbody.useGravity = true;
 
         // Add rigidbody to placed stairs and destroy them after one second
