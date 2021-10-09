@@ -7,46 +7,53 @@ public class ChibiColliderManager : MonoBehaviour
     public Rigidbody playerRigidbody;
     public Material playerMaterial;
     private Color playerDefaultColor;
+    private float _howManySecondsPlayersTriggerStayedInsideObstacle;
 
     private void Start() => playerMaterial.color = playerDefaultColor = new Color(0.25f, 0.25f, 1);
 
-    private void Update() => PlayerColorController();
+    private void Update() => CheckForInput();
 
-    private void OnTriggerEnter(Collider collider)
+
+    private void OnTriggerEnter(Collider other)
     {
-        if (collider.tag == "Stack")
+        if (other.tag == "Stack")
         {
-            Destroy(collider.gameObject);
+            Destroy(other.gameObject);
             StaticVariables.backpack.AddStairToBackpack();
         }
 
-        if (collider.tag == "Obstacle")
+        if (other.tag == "Obstacle")
         {
-            StaticVariables.backpack.DropStairsFromBackPack();
-            StartCoroutine(PushPlayerBack());
+            StartCoroutine(PushPlayerBackAndDropStairs());
         }
     }
-    private IEnumerator PushPlayerBack()
+
+    private IEnumerator PushPlayerBackAndDropStairs()
     {
+        StaticVariables.backpack.DropStairsFromBackPack();
+
+        yield return new WaitForSeconds(0.1f);
+
         playerRigidbody.velocity = new Vector3(1.5f, 6, 0);
         playerMaterial.color = new Color(1f, 0.3f, 0.3f);
 
-        yield return new WaitForSeconds(0.5f);
+        yield return new WaitForSeconds(0.4f);
 
-        // If player didn't already started to place & climb ladder, give a little help to player.
-        // If player did started, playerRigidbody.velocity.magnitude will equal to be 0.
-        if (playerRigidbody.velocity.magnitude != 0) 
-            playerRigidbody.velocity = new Vector3(-1.5f, 2, 0);
-
+        playerRigidbody.velocity = new Vector3(-1.5f, 2, 0);
         playerMaterial.color = playerDefaultColor;
     }
 
-    private void PlayerColorController()
+    private void CheckForInput()
     {
-        if (playerRigidbody.velocity.y > 2f && StaticVariables._isGameStarted)
-            playerMaterial.color = new Color(1f, 0.3f, 0.3f);
-
-        else if (StaticVariables._isGameStarted)
+        if(Input.GetKey(KeyCode.Space) || Input.touchCount > 0)
+        {
+            StopCoroutine(PushPlayerBackAndDropStairs());
             playerMaterial.color = playerDefaultColor;
+
+            playerRigidbody.useGravity = false;
+            playerRigidbody.velocity = Vector3.zero;
+            playerRigidbody.angularVelocity = Vector3.zero;
+            
+        }
     }
 }

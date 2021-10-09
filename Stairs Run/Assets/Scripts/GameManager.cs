@@ -37,7 +37,7 @@ public class GameManager : MonoBehaviour
             {
                 StaticVariables._isGameStarted = true;
 
-                StartToClimbLadder();
+                ResetGravityAndVelocity();
                 StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
             }
 
@@ -62,7 +62,7 @@ public class GameManager : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
-            StartToClimbLadder();
+            ResetGravityAndVelocity();
             StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
         }
 
@@ -75,7 +75,7 @@ public class GameManager : MonoBehaviour
         if (Input.GetKeyUp(KeyCode.Space))
             FallDown();
     }
-    private void StartToClimbLadder()
+    private void ResetGravityAndVelocity()
     {
         playerRigidbody.useGravity = false;
         playerRigidbody.velocity = Vector3.zero;
