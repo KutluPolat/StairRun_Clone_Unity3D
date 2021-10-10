@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class StaticVariables : MonoBehaviour
 {
-    public static bool _isGameStarted, _isGameEnded;
+    public static bool _isGameStarted, _isGameEnded, _isMovementDisabled;
     public static BackpackClass backpack;
     public static StairClass stairSpawnManager;
     private void Awake()

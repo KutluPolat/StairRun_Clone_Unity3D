@@ -25,18 +25,18 @@ public class GameManager : MonoBehaviour
 
     private void VerticalMovementControllerForAndroid()
     {
-        if (StaticVariables.backpack.stairsInBackpackCounter == 0)
-        {
-            FallDown();
-            return;
-        }
-
         if (Input.touchCount > 0)
         {
+            StaticVariables._isGameStarted = true;
+
+            if (StaticVariables.backpack.stairsInBackpackCounter == 0)
+            {
+                FallDown();
+                return;
+            }
+
             if (Input.touches[0].phase == TouchPhase.Began)
             {
-                StaticVariables._isGameStarted = true;
-
                 ResetGravityAndVelocity();
                 StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
             }
@@ -45,7 +45,7 @@ public class GameManager : MonoBehaviour
             ClimbLadder(); 
             
 
-            if (Input.touches[0].phase == TouchPhase.Canceled)
+            if (Input.touches[0].phase == TouchPhase.Ended)
                 FallDown();
         }
     }
@@ -105,7 +105,7 @@ public class GameManager : MonoBehaviour
     private void MoveForward() => Move(-playerHorizontalSpeed * Time.deltaTime);
     private void Move(float directionX, float directionY = 0)
     {
-        if (StaticVariables._isGameStarted && !StaticVariables._isGameEnded)
+        if (StaticVariables._isGameStarted && !StaticVariables._isGameEnded && !StaticVariables._isMovementDisabled)
         {
             transform.position = new Vector3(transform.position.x + directionX, transform.position.y + directionY, transform.position.z);
         }
