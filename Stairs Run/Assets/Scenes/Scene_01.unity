@@ -5265,8 +5265,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 556238709}
-  - component: {fileID: 556238710}
   - component: {fileID: 556238711}
+  - component: {fileID: 556238710}
   m_Layer: 0
   m_Name: ChibiColliderManagerObject
   m_TagString: Untagged
@@ -5282,14 +5282,14 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 556238708}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: -0.006, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 1297581475}
   m_RootOrder: 3
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!136 &556238710
-CapsuleCollider:
+--- !u!65 &556238710
+BoxCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -5298,10 +5298,9 @@ CapsuleCollider:
   m_Material: {fileID: 0}
   m_IsTrigger: 1
   m_Enabled: 1
-  m_Radius: 0.16079992
-  m_Height: 0.6746793
-  m_Direction: 1
-  m_Center: {x: -0.003239572, y: 0.32945466, z: 0.024892494}
+  serializedVersion: 2
+  m_Size: {x: 0.26145205, y: 0.6764951, z: 0.30876338}
+  m_Center: {x: 0.014615878, y: 0.32832408, z: 0.011752784}
 --- !u!114 &556238711
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5314,8 +5313,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b3fa603b5a6d3b344918e20bd3d27ef5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  playerHorizontalSpeed: 4
-  playerVerticalSpeed: 4
+  playerHorizontalSpeed: 3.4
+  playerVerticalSpeed: 3.4
   playerRigidbody: {fileID: 1297581479}
   playerMaterial: {fileID: 2100000, guid: cb96daa1845b6684b85ccaefb93a1b00, type: 2}
   txt_GameEnded: {fileID: 264512284}
@@ -11735,8 +11734,8 @@ BoxCollider:
   m_IsTrigger: 0
   m_Enabled: 1
   serializedVersion: 2
-  m_Size: {x: 0.26145205, y: 0.59957314, z: 0.27937305}
-  m_Center: {x: 0.014615878, y: 0.29993057, z: 0.023260772}
+  m_Size: {x: 0.26145205, y: 0.59957314, z: 0.26774585}
+  m_Center: {x: 0.014615878, y: 0.29993057, z: 0.017447174}
 --- !u!54 &1297581479
 Rigidbody:
   m_ObjectHideFlags: 0

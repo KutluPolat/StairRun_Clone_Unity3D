@@ -8,7 +8,7 @@ public class GameManager : MonoBehaviour
 {
     public static MotionControlClass motionController;
     public static BackpackClass backpack;
-    public float playerHorizontalSpeed = 4f, playerVerticalSpeed = 4f;
+    public float playerHorizontalSpeed = 3.4f, playerVerticalSpeed = 3.4f;
 
     public Rigidbody playerRigidbody;
     public Material playerMaterial;
@@ -28,10 +28,9 @@ public class GameManager : MonoBehaviour
     private void Update()
     {
         motionController.AnimationController();
-        motionController.MovePlayerForward();
-
         CheckForInputToStopCoroutine();
     }
+    private void FixedUpdate() => motionController.MovePlayerForward();
 
 
     private void OnTriggerEnter(Collider other)
@@ -132,7 +131,11 @@ public class GameManager : MonoBehaviour
         motionController.ClimbLadder();
 
         if(backpack.stairsInBackpackCounter == 0)
+        {
+            motionController.FallDown();
             CancelInvoke();
+        }
+            
     }
 
     private void LevelPassed(GameObject other)
