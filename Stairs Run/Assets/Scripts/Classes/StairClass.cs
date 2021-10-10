@@ -17,7 +17,7 @@ public class StairClass
     /// <summary>
     /// Resetting bounds of latest spawned stair according to the player's position so when we call PlaceStairs() method stairs should start to spawn under the player.
     /// </summary>
-    public void ResetStairSpawnStartingPosition()
+    public void SetStairSpawnPositionUnderThePlayer()
     {
         _boundsOfLatestSpawnedNormalStair.center = _boxColliderOfPlayer.bounds.center;
         _boundsOfLatestSpawnedNormalStair.min = _boxColliderOfPlayer.bounds.max;
@@ -31,7 +31,7 @@ public class StairClass
     {
         if (_boundsOfLatestSpawnedNormalStair == null || _boxColliderOfPlayer.bounds.max.x < _boundsOfLatestSpawnedNormalStair.min.x)
         {
-            StaticVariables.backpack.DeleteStairFromBackpack();
+            GameManager.backpack.DeleteStairFromBackpack();
 
             var spawnPosition = new Vector3(
                 _boxColliderOfPlayer.bounds.center.x,

@@ -1,121 +1,147 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.SceneManagement;
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    public Animator playerAnimator;
+    public static MotionControlClass motionController;
+    public static BackpackClass backpack;
+    public float playerHorizontalSpeed = 4f, playerVerticalSpeed = 4f;
+
     public Rigidbody playerRigidbody;
-    public float playerHorizontalSpeed = 2f, playerVerticalSpeed = 3f;
+    public Material playerMaterial;
+    private readonly Color playerDefaultColor = new Color(0.25f, 0.25f, 1);
+    private Coroutine pushPlayerBackAndDropStairsCoroutine;
+    private bool _isInputInsideThisScriptDisabled;
 
-    private void Update()
+    public TextMeshProUGUI txt_GameEnded;
+    private void Start() 
     {
-        AnimationController();
-        PlayerControls();
-    }
-    private void PlayerControls()
-    {
-        MoveForward();
-#if UNITY_EDITOR
-        VerticalMovementControllerForUnityEditor();
-#elif PLATFORM_ANDROID
-        VerticalMovementControllerForAndroid();
-#endif
+        motionController = new MotionControlClass(playerVerticalSpeed, playerHorizontalSpeed);
+        backpack = new BackpackClass();
+
+        playerMaterial.color = playerDefaultColor;
     }
 
-    private void VerticalMovementControllerForAndroid()
+    private void Update() 
     {
-        if (Input.touchCount > 0)
+        motionController.AnimationController();
+        motionController.MovePlayerForward();
+
+        CheckForInputToStopCoroutine();
+    } 
+
+
+    private void OnTriggerEnter(Collider other)
+    {
+        if (other.CompareTag("Stack"))
         {
-            StaticVariables._isGameStarted = true;
+            Destroy(other.gameObject);
+            backpack.AddStairToBackpack();
+        }
 
-            if (StaticVariables.backpack.stairsInBackpackCounter == 0)
+        if (other.CompareTag("Obstacle"))
+        {
+            if(backpack.stairsInBackpackCounter == 0)
             {
-                FallDown();
+                txt_GameEnded.text = "FAILED";
+                motionController.DisableAnimator();
+                _isInputInsideThisScriptDisabled = true;
+                motionController._isMovementDisabled = true;
+                GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
+                return;
+            }
+            // In order to stop this coroutine, I have to use a Coroutine variable like pushPlayerBackAndDropStairsCoroutine.
+            pushPlayerBackAndDropStairsCoroutine = StartCoroutine(PushPlayerBackAndDropStairs());
+        }
+
+        if (other.CompareTag("EndOfThePlatform"))
+        {
+            if(backpack.stairsInBackpackCounter <= 10)
+            {
+                LevelPassed(other.gameObject);
                 return;
             }
 
+            GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
+            motionController.CloseGravityAndResetVelocity();
+            motionController.SetStairSpawnPositionUnderThePlayer();
+            InvokeRepeating("PlaceStairsAsFarAsPlayerCan", 0f, 0.02f);
+        }
+
+        if (other.CompareTag("FinishLine")) 
+        {
+            LevelPassed(other.gameObject);
+        }
+    }
+
+    private IEnumerator PushPlayerBackAndDropStairs()
+    {
+        backpack.DropStairsFromBackPack();
+
+        yield return new WaitForSeconds(0.1f);
+
+        // Push player back, change model color to red
+        playerRigidbody.velocity = new Vector3(3f, 6, 0);
+        playerMaterial.color = new Color(1f, 0.3f, 0.3f);
+        motionController._isMovementDisabled = true;
+
+        yield return new WaitForSeconds(0.5f);
+
+        // A little help for player to start to move, and change model color to default
+        playerRigidbody.velocity = new Vector3(-2f, 0, 0); // A little help for the player.
+        playerMaterial.color = playerDefaultColor;
+        motionController._isMovementDisabled = false;
+
+        // I want stairs to start to spawn under the player. 
+        // And spawning algorithm checks the latest stair and spawns a new stair right next to the latest spawned one. 
+        // Also, we pushed back the player so now, the player is farther back than the latest spawned stair. 
+        // So we have to reset the stair spawn starting position in order for stairs to start to spawn under the player.
+        motionController.SetStairSpawnPositionUnderThePlayer();
+    }
+
+    private void CheckForInputToStopCoroutine()
+    {
+#if UNITY_EDITOR
+        if(Input.GetKeyDown(KeyCode.Space) && !_isInputInsideThisScriptDisabled)
+            StopCoroutine_SetPlayerColorToDefault_EnableMovement();
+#elif PLATFORM_ANDROID
+        if (Input.touchCount > 0 && !motionController._isInputsDisabled)
             if (Input.touches[0].phase == TouchPhase.Began)
-            {
-                ResetGravityAndVelocity();
-                StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
-            }
-
-            StaticVariables.stairSpawnManager.PlaceStairs();
-            ClimbLadder(); 
-            
-
-            if (Input.touches[0].phase == TouchPhase.Ended)
-                FallDown();
-        }
+                StopCoroutine_SetPlayerColorToDefault_EnableMovement();
+#endif
     }
-    private void VerticalMovementControllerForUnityEditor()
+    private void StopCoroutine_SetPlayerColorToDefault_EnableMovement()
     {
-        if (Input.GetKeyDown(KeyCode.W))
-            StaticVariables._isGameStarted = true;
-
-        if (StaticVariables.backpack.stairsInBackpackCounter == 0)
+        if (pushPlayerBackAndDropStairsCoroutine != null) // If there's any coroutine working inside of pushPlayerBackAndDropStairsCoroutine.
         {
-            FallDown();
-            return;
-        }
-
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            ResetGravityAndVelocity();
-            StaticVariables.stairSpawnManager.ResetStairSpawnStartingPosition();
-        }
-
-        if (Input.GetKey(KeyCode.Space))
-        {
-            ClimbLadder();
-            StaticVariables.stairSpawnManager.PlaceStairs();
-        }
-
-        if (Input.GetKeyUp(KeyCode.Space))
-            FallDown();
-    }
-    private void ResetGravityAndVelocity()
-    {
-        playerRigidbody.useGravity = false;
-        playerRigidbody.velocity = Vector3.zero;
-        playerRigidbody.angularVelocity = Vector3.zero;
-    }
-    private void FallDown()
-    {
-        // Set useGravity to true so chibi can fall down
-        playerRigidbody.useGravity = true;
-
-        // Add rigidbody to placed stairs and destroy them after one second
-        foreach (GameObject spawnedStair in GameObject.FindGameObjectsWithTag("SpawnedStair"))
-        {
-            if (spawnedStair.GetComponent<Rigidbody>() == null)
-                spawnedStair.AddComponent<Rigidbody>();
-
-            spawnedStair.GetComponent<BoxCollider>().isTrigger = false; // Closing is trigger so stairs can stop when they hit platform.
-            StartCoroutine(DestroyAfterOneSecond(spawnedStair));
+            StopCoroutine(pushPlayerBackAndDropStairsCoroutine);
+            playerMaterial.color = playerDefaultColor;
+            motionController._isMovementDisabled = false;
         }
     }
-    private IEnumerator DestroyAfterOneSecond(GameObject objectThatWillDestroyed)
+    private void PlaceStairsAsFarAsPlayerCan()
     {
-        yield return new WaitForSeconds(1f);
-        Destroy(objectThatWillDestroyed);
-    }
-    private void ClimbLadder() => Move(0, playerVerticalSpeed * Time.deltaTime);
-    private void MoveForward() => Move(-playerHorizontalSpeed * Time.deltaTime);
-    private void Move(float directionX, float directionY = 0)
-    {
-        if (StaticVariables._isGameStarted && !StaticVariables._isGameEnded && !StaticVariables._isMovementDisabled)
-        {
-            transform.position = new Vector3(transform.position.x + directionX, transform.position.y + directionY, transform.position.z);
-        }
-    }
-    private void AnimationController()
-    {
-        if(playerRigidbody.velocity.magnitude > 0.5f && StaticVariables._isGameStarted)
-            playerAnimator.SetTrigger("Fall");
+        motionController.PlaceStairs();
+        motionController.ClimbLadder();
 
-        else if(StaticVariables._isGameStarted)
-            playerAnimator.SetTrigger("Run");
+        if(backpack.stairsInBackpackCounter == 0)
+            CancelInvoke();
     }
+    private void LevelPassed(GameObject other)
+    {
+        int rewardMultiplier = int.Parse(other.GetComponent<TextMeshPro>().text);
+        txt_GameEnded.text = $"Passed. \n Points: {100 * rewardMultiplier}";
+
+        GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
+        motionController.TurnChibisFaceTowardsPlayer();
+        motionController.FallDown();
+        motionController._isWinConditionTrue = true;
+        backpack.DestroyBackpack();
+        motionController.AnimationController(); // Setting animation to dance because isWinConditionTrue is true
+    }
+
+    public void Restart() => SceneManager.LoadScene("Scene_01");
 }

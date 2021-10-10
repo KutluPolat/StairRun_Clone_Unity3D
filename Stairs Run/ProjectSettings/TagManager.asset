@@ -8,6 +8,8 @@ TagManager:
   - Platform
   - Obstacle
   - SpawnedStair
+  - FinishLine
+  - EndOfThePlatform
   layers:
   - Default
   - TransparentFX

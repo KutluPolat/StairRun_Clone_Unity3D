@@ -33,8 +33,8 @@ public class BackpackClass
                     _stairsInBackpack[vertical, horizontal] = 
                         MonoBehaviour.Instantiate(_miniStairForBackpack, Vector3.zero, Quaternion.identity, _backpack.transform);
 
-                    float localZValue = horizontal == 0 ? -0.1f : horizontal == 1 ? 0 : 0.1f;
-                    float localYValue = vertical == 0 ? -0.05f : vertical == 1 ? 0 : 0.05f * (vertical - 1);
+                    float localZValue = horizontal == 0 ? -0.1f : horizontal == 1 ? 0 : 0.1f;                // 0.1f is horizontal gap between mini stairs in backpack
+                    float localYValue = vertical == 0 ? -0.05f : vertical == 1 ? 0 : 0.05f * (vertical - 1); // 0.05f is vertical gap between mini stairs in backpack
                     var spawnPosition = new Vector3(0, localYValue, localZValue);
                     var rotation = Quaternion.Euler(0, 90, 0);
 
@@ -81,8 +81,7 @@ public class BackpackClass
                 // if there's any valid object instantiate it to a temporary object and destroy the original one.
                 if (_stairsInBackpack[localY, localZ] != null)
                 {
-                    var temporalObject = new GameObject();
-                    temporalObject = MonoBehaviour.Instantiate( 
+                    var temporalObject = MonoBehaviour.Instantiate( 
                         _stairsInBackpack[localY, localZ],
                         _stairsInBackpack[localY, localZ].transform.position,
                         _stairsInBackpack[localY, localZ].transform.rotation);
@@ -93,6 +92,8 @@ public class BackpackClass
                     temporalObject.AddComponent<Rigidbody>()
                         .velocity = new Vector3(Random.Range(-1f, 1f), Random.Range(3f, 5f), Random.Range(-1f, 1f));
 
+                    MonoBehaviour.Destroy(temporalObject, 1.5f);
+
                     droppedStairCounter++;
                     if (droppedStairCounter == 10)
                         return;
@@ -100,4 +101,5 @@ public class BackpackClass
             }
         }
     }
+    public void DestroyBackpack() => MonoBehaviour.Destroy(_backpack);
 }
