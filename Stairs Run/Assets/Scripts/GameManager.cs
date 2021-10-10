@@ -17,7 +17,7 @@ public class GameManager : MonoBehaviour
     private bool _isInputInsideThisScriptDisabled;
 
     public TextMeshProUGUI txt_GameEnded;
-    private void Start() 
+    private void Start()
     {
         motionController = new MotionControlClass(playerVerticalSpeed, playerHorizontalSpeed);
         backpack = new BackpackClass();
@@ -25,13 +25,13 @@ public class GameManager : MonoBehaviour
         playerMaterial.color = playerDefaultColor;
     }
 
-    private void Update() 
+    private void Update()
     {
         motionController.AnimationController();
         motionController.MovePlayerForward();
 
         CheckForInputToStopCoroutine();
-    } 
+    }
 
 
     private void OnTriggerEnter(Collider other)
@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
 
         if (other.CompareTag("Obstacle"))
         {
-            if(backpack.stairsInBackpackCounter == 0)
+            if (backpack.stairsInBackpackCounter == 0)
             {
                 txt_GameEnded.text = "FAILED";
                 motionController.DisableAnimator();
@@ -59,7 +59,7 @@ public class GameManager : MonoBehaviour
 
         if (other.CompareTag("EndOfThePlatform"))
         {
-            if(backpack.stairsInBackpackCounter <= 10)
+            if (backpack.stairsInBackpackCounter <= 10)
             {
                 LevelPassed(other.gameObject);
                 return;
@@ -68,15 +68,14 @@ public class GameManager : MonoBehaviour
             GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
             motionController.CloseGravityAndResetVelocity();
             motionController.SetStairSpawnPositionUnderThePlayer();
-            InvokeRepeating("PlaceStairsAsFarAsPlayerCan", 0f, 0.02f);
+            InvokeRepeating(nameof(PlaceStairsAsFarAsPlayerCan), 0f, 0.02f);
         }
 
-        if (other.CompareTag("FinishLine")) 
+        if (other.CompareTag("FinishLine"))
         {
             LevelPassed(other.gameObject);
         }
     }
-
     private IEnumerator PushPlayerBackAndDropStairs()
     {
         backpack.DropStairsFromBackPack();
@@ -104,15 +103,19 @@ public class GameManager : MonoBehaviour
 
     private void CheckForInputToStopCoroutine()
     {
+        if (_isInputInsideThisScriptDisabled)
+            return;
+
 #if UNITY_EDITOR
-        if(Input.GetKeyDown(KeyCode.Space) && !_isInputInsideThisScriptDisabled)
+        if (Input.GetKeyDown(KeyCode.Space))
             StopCoroutine_SetPlayerColorToDefault_EnableMovement();
 #elif PLATFORM_ANDROID
-        if (Input.touchCount > 0 && !motionController._isInputsDisabled)
+        if (Input.touchCount > 0)
             if (Input.touches[0].phase == TouchPhase.Began)
                 StopCoroutine_SetPlayerColorToDefault_EnableMovement();
 #endif
     }
+
     private void StopCoroutine_SetPlayerColorToDefault_EnableMovement()
     {
         if (pushPlayerBackAndDropStairsCoroutine != null) // If there's any coroutine working inside of pushPlayerBackAndDropStairsCoroutine.
@@ -122,6 +125,7 @@ public class GameManager : MonoBehaviour
             motionController._isMovementDisabled = false;
         }
     }
+
     private void PlaceStairsAsFarAsPlayerCan()
     {
         motionController.PlaceStairs();
@@ -130,6 +134,7 @@ public class GameManager : MonoBehaviour
         if(backpack.stairsInBackpackCounter == 0)
             CancelInvoke();
     }
+
     private void LevelPassed(GameObject other)
     {
         int rewardMultiplier = int.Parse(other.GetComponent<TextMeshPro>().text);
