@@ -9,7 +9,8 @@ public class MotionControlClass : StairClass
     private Rigidbody _playerRigidbody;
     private Animator _playerAnimator;
 
-    public bool _isGameStarted, _isWinConditionTrue, _isMovementDisabled;
+    // _isLevelStarted: Checks players first input to start running animation and moving forward.
+    public bool _isLevelStarted, _isWinConditionTrue, _isMovementDisabled;
 
     private float _playerVerticalSpeed, _playerHorizontalSpeed;
 
@@ -23,7 +24,7 @@ public class MotionControlClass : StairClass
         _playerVerticalSpeed = playerVerticalSpeed;
         _playerHorizontalSpeed = playerHorizontalSpeed;
 
-        _isGameStarted = false;
+        _isLevelStarted = false;
         _isWinConditionTrue = false;
         _isMovementDisabled = false;
     }
@@ -56,7 +57,7 @@ public class MotionControlClass : StairClass
 
     private void Move(float directionX, float directionY = 0)
     {
-        if (_isGameStarted && !_isWinConditionTrue && !_isMovementDisabled)
+        if (_isLevelStarted && !_isWinConditionTrue && !_isMovementDisabled)
         {
             _playerTransform.position = new Vector3(
                     _playerTransform.position.x + directionX,
@@ -70,10 +71,10 @@ public class MotionControlClass : StairClass
         if (_isWinConditionTrue)
             _playerAnimator.SetTrigger("Dance");
 
-        else if (_playerRigidbody.velocity.magnitude > 0.5f && _isGameStarted)
+        else if (_playerRigidbody.velocity.magnitude > 0.5f && _isLevelStarted)
             _playerAnimator.SetTrigger("Fall");
 
-        else if (_isGameStarted)
+        else if (_isLevelStarted)
             _playerAnimator.SetTrigger("Run");
     }
 

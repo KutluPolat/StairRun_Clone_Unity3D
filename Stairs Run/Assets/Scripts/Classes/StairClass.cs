@@ -31,6 +31,7 @@ public class StairClass
     {
         if (_boundsOfLatestSpawnedNormalStair == null || _boxColliderOfPlayer.bounds.max.x < _boundsOfLatestSpawnedNormalStair.min.x)
         {
+            Debug.Log("Player placed a stair.");
             GameManager.backpack.DeleteStairFromBackpack();
 
             var spawnPosition = new Vector3(

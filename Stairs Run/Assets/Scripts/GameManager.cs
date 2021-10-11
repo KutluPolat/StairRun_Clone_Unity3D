@@ -10,15 +10,28 @@ public class GameManager : MonoBehaviour
     public static BackpackClass backpack;
     public float playerHorizontalSpeed = 3.4f, playerVerticalSpeed = 3.4f;
 
+    private static float howLongHasGameBeenPlayed;
+    private float howLongHasLevelBeenPlayed;
+    private static bool _isGameStarted;
+
     public Rigidbody playerRigidbody;
     public Material playerMaterial;
-    private readonly Color playerDefaultColor = new Color(0.25f, 0.25f, 1);
+    private readonly Color playerDefaultColor = new Color(0.3764706f, 0.8941177f, 0.9058823f);
     private Coroutine pushPlayerBackAndDropStairsCoroutine;
     private bool _isInputInsideThisScriptDisabled;
 
-    public TextMeshProUGUI txt_GameEnded;
+    public TextMeshProUGUI txt_LevelEnded;
+
+    private void OnApplicationQuit() => Debug.Log($"The game is finished in {howLongHasGameBeenPlayed} seconds.");
+
     private void Start()
     {
+        if(!_isGameStarted)
+        {
+            Debug.Log("Game has started.");
+            _isGameStarted = true;
+        }
+
         motionController = new MotionControlClass(playerVerticalSpeed, playerHorizontalSpeed);
         backpack = new BackpackClass();
 
@@ -27,8 +40,11 @@ public class GameManager : MonoBehaviour
 
     private void Update()
     {
+        howLongHasGameBeenPlayed += Time.deltaTime;
+        howLongHasLevelBeenPlayed += Time.deltaTime;
+
         motionController.AnimationController();
-        CheckForInputToStopCoroutine();
+        CheckForInputToStopPushBackPlayerCoroutine();
     }
     private void FixedUpdate() => motionController.MovePlayerForward();
 
@@ -43,13 +59,13 @@ public class GameManager : MonoBehaviour
 
         if (other.CompareTag("Obstacle"))
         {
+            Debug.Log("Player hit the obstacle.");
             if (backpack.stairsInBackpackCounter == 0)
             {
-                txt_GameEnded.text = "FAILED";
+                txt_LevelEnded.text = "FAILED";
                 motionController.DisableAnimator();
                 _isInputInsideThisScriptDisabled = true;
                 motionController._isMovementDisabled = true;
-                GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
                 return;
             }
             // In order to stop this coroutine, I have to use a Coroutine variable like pushPlayerBackAndDropStairsCoroutine.
@@ -58,16 +74,10 @@ public class GameManager : MonoBehaviour
 
         if (other.CompareTag("EndOfThePlatform"))
         {
-            if (backpack.stairsInBackpackCounter <= 10)
-            {
-                LevelPassed(other.gameObject);
-                return;
-            }
-
             GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
             motionController.CloseGravityAndResetVelocity();
             motionController.SetStairSpawnPositionUnderThePlayer();
-            InvokeRepeating(nameof(PlaceStairsAsFarAsPlayerCan), 0f, 0.02f);
+            InvokeRepeating(nameof(PlaceStairsAsFarAsPlayerCan), 0f, 0.02f); // Fixed at 50 fps
         }
 
         if (other.CompareTag("FinishLine"))
@@ -78,8 +88,6 @@ public class GameManager : MonoBehaviour
     private IEnumerator PushPlayerBackAndDropStairs()
     {
         backpack.DropStairsFromBackPack();
-
-        yield return new WaitForSeconds(0.1f);
 
         // Push player back, change model color to red
         playerRigidbody.velocity = new Vector3(3f, 6, 0);
@@ -100,7 +108,10 @@ public class GameManager : MonoBehaviour
         motionController.SetStairSpawnPositionUnderThePlayer();
     }
 
-    private void CheckForInputToStopCoroutine()
+
+    // If the player does not want to wait to push back and then forward and wants to go forward by placing and climbing ladders immediately,
+    // stop the coroutine that undertakes all the back & forward movement when input started.
+    private void CheckForInputToStopPushBackPlayerCoroutine()
     {
         if (_isInputInsideThisScriptDisabled)
             return;
@@ -141,7 +152,8 @@ public class GameManager : MonoBehaviour
     private void LevelPassed(GameObject other)
     {
         int rewardMultiplier = int.Parse(other.GetComponent<TextMeshPro>().text);
-        txt_GameEnded.text = $"Passed. \n Points: {100 * rewardMultiplier}";
+        txt_LevelEnded.text = $"Passed. \n Points: {100 * rewardMultiplier}";
+        Debug.Log($"The game is finished in {howLongHasLevelBeenPlayed} seconds.");
 
         GameObject.Find("Chibi").GetComponent<InputManager>().enabled = false; // Disabling input manager will block any input about movement.
         motionController.TurnChibisFaceTowardsPlayer();
@@ -151,5 +163,9 @@ public class GameManager : MonoBehaviour
         motionController.AnimationController(); // Setting animation to dance because isWinConditionTrue is true
     }
 
-    public void Restart() => SceneManager.LoadScene("Scene_01");
+    public void Restart()
+    {
+        Debug.Log("Restarted.");
+        SceneManager.LoadScene("Scene_01"); 
+    }
 }

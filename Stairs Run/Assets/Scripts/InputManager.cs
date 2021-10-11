@@ -16,7 +16,7 @@ public class InputManager : MonoBehaviour
     private void VerticalMovementControllerForUnityEditor()
     {
         if (Input.GetKeyDown(KeyCode.W))
-            GameManager.motionController._isGameStarted = true;
+            GameManager.motionController._isLevelStarted = true;
 
         if (GameManager.backpack.stairsInBackpackCounter == 0)
         {
@@ -44,7 +44,7 @@ public class InputManager : MonoBehaviour
     {
         if (Input.touchCount > 0)
         {
-            GameManager.motionController._isGameStarted = true;
+            GameManager.motionController._isLevelStarted = true;
 
             if (GameManager.backpack.stairsInBackpackCounter == 0)
             {

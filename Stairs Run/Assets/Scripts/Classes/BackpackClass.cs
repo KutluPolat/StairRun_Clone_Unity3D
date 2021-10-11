@@ -24,6 +24,7 @@ public class BackpackClass
     /// </summary>
     public void AddStairToBackpack()
     {
+        Debug.Log("Player picked a stair.");
         for (int vertical = 0; vertical < 50; vertical++) // Vertical elements in _stairsInBackpack, first parameter.
         {
             for (int horizontal = 0; horizontal < 3; horizontal++) // Horizontal elements in _stairsInBackpack, second parameter.
